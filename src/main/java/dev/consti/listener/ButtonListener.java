@@ -14,6 +14,7 @@ public class ButtonListener extends ListenerAdapter {
         if (Objects.equals(event.getButton().getId(), "create_ticket")) {
             TicketHandler ticketHandler = new TicketHandler();
             ticketHandler.startTicketProcess(Objects.requireNonNull(event.getMember()), event.getChannel().asTextChannel(), "Ticket Title", "Ticket Description");
+
         } else if (Objects.equals(event.getButton().getId(), "close_ticket")) {
             event.getChannel().delete().queue();
         }

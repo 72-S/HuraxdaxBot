@@ -1,14 +1,20 @@
 package dev.consti.ticket;
 
+import dev.consti.utils.ConfigHandler;
 import dev.consti.utils.GithubService;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
-import java.awt.*;
+
+import java.awt.Color;
+import java.util.List;
+
 
 public class TicketHandler {
 
@@ -16,7 +22,7 @@ public class TicketHandler {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Ticket System")
                 .setDescription("To create a ticket, click the button below.")
-                .setFooter("TicketTool.xyz - Ticketing without clutter", null)
+                .setFooter("HuraxdaxBot - Ticketing without clutter", null)
                 .setColor(Color.GREEN);
 
         MessageEmbed messageEmbed = embedBuilder.build();
@@ -27,12 +33,22 @@ public class TicketHandler {
 
     public void startTicketProcess(Member member, TextChannel channel, String title, String description) {
         GithubService githubService = new GithubService();
-        String issueUrl = githubService.createIssue(title, description);
 
-        channel.createThreadChannel("ticket-" + member.getEffectiveName())
+        String supportRoleId = ConfigHandler.getProperty("SUPPORT_ROLE_ID"); // Add the role ID in your config
+
+        channel.createThreadChannel("ticket-" + member.getId(), true) // true for private thread
                 .queue(threadChannel -> {
+                    // Grant the support role access to the thread
+                    Role supportRole = channel.getGuild().getRoleById(supportRoleId);
+                    if (supportRole != null) {
+                        List<Member> supportMembers = threadChannel.getGuild().getMembersWithRoles(supportRole);
+                        for (Member supportMember : supportMembers) {
+                            threadChannel.addThreadMemberById(supportMember.getId()).queue();
+                        }
+                    }
+
                     threadChannel.sendMessage("Ticket created by " + member.getAsMention()).queue();
-                    threadChannel.sendMessage("Issue created: " + issueUrl).queue();
+
                     sendCloseTicketMessage(threadChannel);
                 });
     }
