@@ -32,12 +32,14 @@ public class ButtonListener extends ListenerAdapter {
 
             Button confirmChecklistButton = Button.primary("confirm_checklist", "✅ Confirm Checklist");
 
-            event.editMessage("**Troubleshooting Checklist:**\n" +
-                            "- [:question:] Installed the newest version of the plugin\n" +
-                            "- [:question:] Checked compatibility with the current Minecraft version\n" +
-                            "- [:question:] Verified Java version is compatible\n" +
-                            "- [:question:] The scripts are correctly configured\n\n" +
-                            "Please confirm that you have completed all the points above.")
+            event.editMessage("""
+                            **Troubleshooting Checklist:**
+                            - [:question:] Installed the newest version of the plugin
+                            - [:question:] Checked compatibility with the current Minecraft version
+                            - [:question:] Verified Java version is compatible
+                            - [:question:] The scripts are correctly configured
+
+                            Please confirm that you have completed all the points above.""")
                     .setActionRow(confirmChecklistButton)
                     .queue();
         } else if (Objects.equals(event.getButton().getId(), "confirm_checklist")) {
