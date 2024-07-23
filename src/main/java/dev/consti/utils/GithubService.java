@@ -12,10 +12,12 @@ public class GithubService {
     public String createIssue(String title, String type, String description, String additionalInfo) {
         OkHttpClient client = new OkHttpClient();
 
-        String issueBody = String.format("### %s\n\n**Type:** %s\n\n**Description:**\n%s\n\n**Additional Info:**\n%s",
-                title, type, description, additionalInfo);
+        // Escape special characters and newlines properly for JSON
+        String issueBody = String.format("### %s\\n\\n**Type:** %s\\n\\n**Description:**\\n%s\\n\\n**Additional Info:**\\n%s",
+                escapeString(title), escapeString(type), escapeString(description), escapeString(additionalInfo));
 
-        String json = "{\"title\":\"" + title + "\",\"body\":\"" + issueBody + "\"}";
+        // Construct JSON payload correctly
+        String json = String.format("{\"title\":\"%s\",\"body\":\"%s\"}", escapeString(title), issueBody);
 
         RequestBody body = RequestBody.create(json, MediaType.parse("application/json"));
         Request request = new Request.Builder()
@@ -24,8 +26,14 @@ public class GithubService {
                 .header("Authorization", "token " + GITHUB_TOKEN)
                 .build();
 
+        System.out.println("JSON Payload: " + json); // Log JSON payload
+
         try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+            if (!response.isSuccessful()) {
+                System.out.println("Response code: " + response.code());
+                System.out.println("Response body: " + response.body().string());
+                throw new IOException("Unexpected code " + response);
+            }
 
             // Parse response to get the issue URL
             String responseBody = response.body().string();
@@ -35,5 +43,16 @@ public class GithubService {
             e.printStackTrace();
             return null;
         }
+    }
+
+    // Helper method to escape JSON special characters
+    private String escapeString(String input) {
+        return input.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t")
+                .replace("\b", "\\b")
+                .replace("\f", "\\f");
     }
 }

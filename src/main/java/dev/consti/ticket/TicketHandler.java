@@ -13,7 +13,6 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import java.awt.Color;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class TicketHandler {
 
@@ -80,19 +79,16 @@ public class TicketHandler {
                     embedBuilder.setTitle(title)
                             .setAuthor(member.getUser().getAsTag(), null, member.getUser().getEffectiveAvatarUrl())
                             .addField("Type", typeLabel, true)
-                            .addField("Description", description, false)
-                            .addBlankField(false);
+                            .addField("Description", description, false);
 
-                    // Only add Additional Info field if there is additional info provided
-                    if (additionalInfo.length > 0 && !additionalInfo[0].isEmpty()) {
-                        StringBuilder additionalInfoBuilder = new StringBuilder();
-                        for (String info : additionalInfo) {
-                            additionalInfoBuilder.append(info).append("\n");
+                    // Add additional info fields if provided
+                    for (String info : additionalInfo) {
+                        if (!info.isEmpty()) {
+                            String[] parts = info.split(":", 2);
+                            if (parts.length == 2) {
+                                embedBuilder.addField(parts[0].trim(), parts[1].trim(), false);
+                            }
                         }
-                        embedBuilder.addField("Additional Info", additionalInfoBuilder.toString(), false)
-                                .addBlankField(false);
-                    } else {
-                        embedBuilder.addField("Additional Info", "None", false);
                     }
 
                     embedBuilder.setColor(typeColor)
