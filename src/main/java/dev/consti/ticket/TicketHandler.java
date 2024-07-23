@@ -40,10 +40,14 @@ public class TicketHandler {
 
         channel.createThreadChannel("ticket-" + member.getId(), true) // true for private thread
                 .queue(threadChannel -> {
-                    // Grant the support role access to the threada
+                    // Grant the support role access to the thread
                     Role supportRole = channel.getGuild().getRoleById(supportRoleId);
                     if (supportRole != null) {
-                        List<Member> supportMembers = threadChannel.getGuild().getMembersWithRoles(supportRole);
+                        // Fetch all members in the guild and filter those with the support role
+                        List<Member> supportMembers = channel.getGuild().getMembers().stream()
+                                .filter(guildMember -> guildMember.getRoles().contains(supportRole))
+                                .toList();
+
                         for (Member supportMember : supportMembers) {
                             threadChannel.addThreadMemberById(supportMember.getId()).queue();
                         }
