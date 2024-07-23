@@ -12,9 +12,11 @@ public class ButtonListener extends ListenerAdapter {
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
         if (Objects.equals(event.getButton().getId(), "create_ticket")) {
+            event.reply("Creating your ticket...").setEphemeral(true).queue(interactionHook -> {
             TicketHandler ticketHandler = new TicketHandler();
             ticketHandler.startTicketProcess(Objects.requireNonNull(event.getMember()), event.getChannel().asTextChannel(), "Ticket Title", "Ticket Description");
-
+            interactionHook.deleteOriginal().queue();
+            });
         } else if (Objects.equals(event.getButton().getId(), "close_ticket")) {
             event.getChannel().delete().queue();
         }
