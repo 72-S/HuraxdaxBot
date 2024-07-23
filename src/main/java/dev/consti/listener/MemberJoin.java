@@ -11,12 +11,12 @@ public class MemberJoin extends ListenerAdapter {
     @Override
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
         Guild guild = event.getGuild();
-        Role role = guild.getRolesByName(ConfigHandler.getProperty("WELCOME_ROLE_NAME"), true).stream().findFirst().orElse(null);
+        Role role = guild.getRolesByName(ConfigHandler.getProperty("MEMBER_ROLE_ID"), true).stream().findFirst().orElse(null);
 
         if (role != null) {
             guild.addRoleToMember(event.getMember(), role).queue();
         } else {
-            System.out.println("Role not found: " + ConfigHandler.getProperty("WELCOME_ROLE_NAME"));
+            System.out.println("Role not found: " + ConfigHandler.getProperty("MEMBER_ROLE_ID"));
         }
     }
 }
