@@ -28,9 +28,21 @@ public class ButtonListener extends ListenerAdapter {
             // Close the ticket
             event.getChannel().delete().queue();
         } else if (Objects.equals(event.getButton().getId(), "create_bug_report")) {
-            // Delete the original message and create a modal for Bug Report
-            event.getMessage().delete().queue();
+            // Send checklist message for Bug Report
 
+            Button confirmChecklistButton = Button.primary("confirm_checklist", "✅ Confirm Checklist");
+
+            event.editMessage("**Troubleshooting Checklist:**\n" +
+                            "- [:question:] Installed the newest version of the plugin\n" +
+                            "- [:question:] Checked compatibility with the current Minecraft version\n" +
+                            "- [:question:] Verified Java version is compatible\n" +
+                            "- [:question:] The scripts are correctly configured\n\n" +
+                            "Please confirm that you have completed all the points above.")
+                    .setActionRow(confirmChecklistButton)
+                    .queue();
+        } else if (Objects.equals(event.getButton().getId(), "confirm_checklist")) {
+            event.getMessage().delete().queue();
+            // Create and send a modal for Bug Report after confirming the checklist
             TextInput titleInput = TextInput.create("title", "Title", TextInputStyle.SHORT)
                     .setPlaceholder("Enter the bug title here...")
                     .setRequired(true)
