@@ -1,7 +1,6 @@
 package dev.consti.ticket;
 
 import dev.consti.utils.ConfigHandler;
-import dev.consti.utils.GithubService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -14,6 +13,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import java.awt.Color;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class TicketHandler {
 
@@ -32,9 +32,7 @@ public class TicketHandler {
         });
     }
 
-    public void startTicketProcess(Member member, TextChannel channel, String title, String description, String... additionalInfo) {
-        GithubService githubService = new GithubService();
-
+    public void startTicketProcess(Member member, TextChannel channel, String type, String title, String description, String... additionalInfo) {
         String supportRoleId = ConfigHandler.getProperty("SUPPORT_ROLE_ID"); // Add the role ID in your config
 
         channel.createThreadChannel("ticket-" + member.getId(), true) // true for private thread
@@ -51,21 +49,47 @@ public class TicketHandler {
                         }
                     }
 
-                    threadChannel.sendMessage("Ticket created by " + member.getAsMention()).queue();
+                    EmbedBuilder embedBuilder = new EmbedBuilder();
+                    embedBuilder.setTitle("Ticket Details")
+                            .addField("Created By", member.getAsMention(), false)
+                            .addField("Title", title, false)
+                            .addField("Description", description, false);
 
-                    StringBuilder messageContent = new StringBuilder();
-                    messageContent.append("**Title:** ").append(title).append("\n")
-                            .append("**Description:** ").append(description).append("\n");
-
-                    if (additionalInfo.length > 0) {
-                        messageContent.append("**Additional Info:**\n");
+                    // Only add Additional Info field if there is additional info provided
+                    if (additionalInfo.length > 0 && !additionalInfo[0].isEmpty()) {
+                        StringBuilder additionalInfoBuilder = new StringBuilder();
                         for (String info : additionalInfo) {
-                            messageContent.append(info).append("\n");
+                            additionalInfoBuilder.append(info).append("\n");
                         }
+                        embedBuilder.addField("Additional Info", additionalInfoBuilder.toString(), false);
+                    } else {
+                        embedBuilder.addField("Additional Info", "None", false);
                     }
 
-                    threadChannel.sendMessage(messageContent.toString()).queue();
-                    sendCloseTicketMessage(threadChannel);
+                    // Set the color based on the ticket type
+                    switch (type.toLowerCase()) {
+                        case "bug_report":
+                            embedBuilder.setColor(Color.RED);
+                            break;
+                        case "feature_request":
+                            embedBuilder.setColor(Color.getHSBColor(231f / 360f, 0.636f, 0.949f));
+                            break;
+                        case "custom":
+                            embedBuilder.setColor(Color.GRAY);
+                            break;
+                        default:
+                            embedBuilder.setColor(Color.GREEN);
+                            break;
+                    }
+
+                    embedBuilder.setDescription("Please wait for a support member to assist you.")
+                            .setFooter("To close this ticket, click the button below.", null);
+
+                    MessageEmbed messageEmbed = embedBuilder.build();
+
+                    threadChannel.sendMessageEmbeds(messageEmbed)
+                            .addActionRow(Button.danger("close_ticket", "Close Ticket"))
+                            .queue();
                 });
     }
 
@@ -76,17 +100,5 @@ public class TicketHandler {
                 channel.purgeMessages(messagesToDelete);
             }
         });
-    }
-
-    private void sendCloseTicketMessage(ThreadChannel threadChannel) {
-        EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Close Ticket")
-                .setDescription("To close this ticket, click the button below.")
-                .setColor(Color.RED);
-
-        MessageEmbed messageEmbed = embedBuilder.build();
-        threadChannel.sendMessageEmbeds(messageEmbed)
-                .setActionRow(Button.danger("close_ticket", "Close Ticket"))
-                .queue();
     }
 }

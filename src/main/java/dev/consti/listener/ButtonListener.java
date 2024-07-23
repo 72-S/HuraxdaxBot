@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 
-
 import java.util.Objects;
 
 public class ButtonListener extends ListenerAdapter {
@@ -17,9 +16,9 @@ public class ButtonListener extends ListenerAdapter {
     public void onButtonInteraction(ButtonInteractionEvent event) {
         if (Objects.equals(event.getButton().getId(), "create_ticket")) {
             // Create buttons for Bug Report, Feature Request, and Custom
-            Button bugReportButton = Button.primary("create_bug_report", "🐞 Bug Report");
+            Button bugReportButton = Button.danger("create_bug_report", "🐞 Bug Report");
             Button featureRequestButton = Button.primary("create_feature_request", "✨ Feature Request");
-            Button customButton = Button.primary("create_custom_ticket", "📝 Custom");
+            Button customButton = Button.secondary("create_custom_ticket", "📝 Custom");
 
             event.reply("Please choose the type of ticket:")
                     .addActionRow(bugReportButton, featureRequestButton, customButton)
@@ -29,17 +28,16 @@ public class ButtonListener extends ListenerAdapter {
             event.getChannel().delete().queue();
         } else if (Objects.equals(event.getButton().getId(), "create_bug_report")) {
             // Send checklist message for Bug Report
-
             Button confirmChecklistButton = Button.primary("confirm_checklist", "✅ Confirm Checklist");
 
             event.editMessage("""
-                            **Troubleshooting Checklist:**
-                            - [:question:] Installed the newest version of the plugin
-                            - [:question:] Checked compatibility with the current Minecraft version
-                            - [:question:] Verified Java version is compatible
-                            - [:question:] The scripts are correctly configured
+                    **Troubleshooting Checklist:**
+                    - [:question:] Installed the newest version of the plugin
+                    - [:question:] Checked compatibility with the current Minecraft version
+                    - [:question:] Verified Java version is compatible
+                    - [:question:] The scripts are correctly configured
 
-                            Please confirm that you have completed all the points above.""")
+                    Please confirm that you have completed all the points above.""")
                     .setActionRow(confirmChecklistButton)
                     .queue();
         } else if (Objects.equals(event.getButton().getId(), "confirm_checklist")) {
@@ -131,7 +129,7 @@ public class ButtonListener extends ListenerAdapter {
             String expected = event.getValue("expected") != null ? Objects.requireNonNull(event.getValue("expected")).getAsString() : "";
 
             // Proceed to create the ticket using the input
-            ticketHandler.startTicketProcess(Objects.requireNonNull(event.getMember()), event.getChannel().asTextChannel(), title, description, steps, expected);
+            ticketHandler.startTicketProcess(Objects.requireNonNull(event.getMember()), event.getChannel().asTextChannel(), "bug_report", title, description, steps, expected);
 
             event.deferEdit().queue();
         } else if (event.getModalId().equals("feature_request_modal")) {
@@ -141,7 +139,7 @@ public class ButtonListener extends ListenerAdapter {
             String alternatives = event.getValue("alternatives") != null ? Objects.requireNonNull(event.getValue("alternatives")).getAsString() : "";
 
             // Proceed to create the ticket using the input
-            ticketHandler.startTicketProcess(Objects.requireNonNull(event.getMember()), event.getChannel().asTextChannel(), title, description, alternatives);
+            ticketHandler.startTicketProcess(Objects.requireNonNull(event.getMember()), event.getChannel().asTextChannel(), "feature_request", title, description, alternatives);
 
             event.deferEdit().queue();
         } else if (event.getModalId().equals("custom_ticket_modal")) {
@@ -150,7 +148,7 @@ public class ButtonListener extends ListenerAdapter {
             String description = Objects.requireNonNull(event.getValue("description")).getAsString();
 
             // Proceed to create the ticket using the input
-            ticketHandler.startTicketProcess(Objects.requireNonNull(event.getMember()), event.getChannel().asTextChannel(), title, description);
+            ticketHandler.startTicketProcess(Objects.requireNonNull(event.getMember()), event.getChannel().asTextChannel(), "custom", title, description);
 
             event.deferEdit().queue();
         }
