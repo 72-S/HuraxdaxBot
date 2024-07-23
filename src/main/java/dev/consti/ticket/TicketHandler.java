@@ -5,7 +5,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import java.awt.*;
 
@@ -14,12 +15,14 @@ public class TicketHandler {
     public void sendTicketMessage(TextChannel channel) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Ticket System")
-                .setDescription("To create a ticket react with :envelope_with_arrow:")
+                .setDescription("To create a ticket, click the button below.")
                 .setFooter("TicketTool.xyz - Ticketing without clutter", null)
                 .setColor(Color.GREEN);
 
         MessageEmbed messageEmbed = embedBuilder.build();
-        channel.sendMessageEmbeds(messageEmbed).queue(message -> message.addReaction(Emoji.fromUnicode("U+1F4E9")).queue());
+        channel.sendMessageEmbeds(messageEmbed)
+                .setActionRow(Button.primary("create_ticket", "Create Ticket"))
+                .queue();
     }
 
     public void startTicketProcess(Member member, TextChannel channel, String title, String description) {
@@ -30,6 +33,19 @@ public class TicketHandler {
                 .queue(threadChannel -> {
                     threadChannel.sendMessage("Ticket created by " + member.getAsMention()).queue();
                     threadChannel.sendMessage("Issue created: " + issueUrl).queue();
+                    sendCloseTicketMessage(threadChannel);
                 });
+    }
+
+    private void sendCloseTicketMessage(ThreadChannel threadChannel) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle("Close Ticket")
+                .setDescription("To close this ticket, click the button below.")
+                .setColor(Color.RED);
+
+        MessageEmbed messageEmbed = embedBuilder.build();
+        threadChannel.sendMessageEmbeds(messageEmbed)
+                .setActionRow(Button.danger("close_ticket", "Close Ticket"))
+                .queue();
     }
 }
