@@ -3,7 +3,6 @@ package dev.consti.ticket;
 import dev.consti.utils.ConfigHandler;
 import dev.consti.utils.GithubService;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -15,6 +14,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import java.awt.Color;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class TicketHandler {
 
@@ -43,7 +43,56 @@ public class TicketHandler {
                     // Grant the support role access to the thread
                     Role supportRole = channel.getGuild().getRoleById(supportRoleId);
                     if (supportRole != null) {
-                        // Fetch all members in the guild and filter those with the support role
+                        List<Member> supportMembers = channel.getGuild().getMembers().stream()
+                                .filter(guildMember -> guildMember.getRoles().contains(supportRole))
+                                .collect(Collectors.toList());
+
+                        for (Member supportMember : supportMembers) {
+                            threadChannel.addThreadMemberById(supportMember.getId()).queue();
+                        }
+                    }
+
+                    threadChannel.sendMessage("Ticket created by " + member.getAsMention()).queue();
+                    threadChannel.sendMessage("**Title:** " + title + "\n**Description:** " + description).queue();
+                    sendCloseTicketMessage(threadChannel);
+                });
+    }
+
+    public void startTicketProcess(Member member, TextChannel channel, String title, String description, String steps, String expected) {
+        GithubService githubService = new GithubService();
+
+        String supportRoleId = ConfigHandler.getProperty("SUPPORT_ROLE_ID"); // Add the role ID in your config
+
+        channel.createThreadChannel("ticket-" + member.getId(), true) // true for private thread
+                .queue(threadChannel -> {
+                    // Grant the support role access to the thread
+                    Role supportRole = channel.getGuild().getRoleById(supportRoleId);
+                    if (supportRole != null) {
+                        List<Member> supportMembers = channel.getGuild().getMembers().stream()
+                                .filter(guildMember -> guildMember.getRoles().contains(supportRole))
+                                .collect(Collectors.toList());
+
+                        for (Member supportMember : supportMembers) {
+                            threadChannel.addThreadMemberById(supportMember.getId()).queue();
+                        }
+                    }
+
+                    threadChannel.sendMessage("Ticket created by " + member.getAsMention()).queue();
+                    threadChannel.sendMessage("**Title:** " + title + "\n**Description:** " + description + "\n**Steps to Reproduce:** " + steps + "\n**Expected Behavior:** " + expected).queue();
+                    sendCloseTicketMessage(threadChannel);
+                });
+    }
+
+    public void startTicketProcess(Member member, TextChannel channel, String title, String description, String alternatives) {
+        GithubService githubService = new GithubService();
+
+        String supportRoleId = ConfigHandler.getProperty("SUPPORT_ROLE_ID"); // Add the role ID in your config
+
+        channel.createThreadChannel("ticket-" + member.getId(), true) // true for private thread
+                .queue(threadChannel -> {
+                    // Grant the support role access to the thread
+                    Role supportRole = channel.getGuild().getRoleById(supportRoleId);
+                    if (supportRole != null) {
                         List<Member> supportMembers = channel.getGuild().getMembers().stream()
                                 .filter(guildMember -> guildMember.getRoles().contains(supportRole))
                                 .toList();
@@ -54,6 +103,7 @@ public class TicketHandler {
                     }
 
                     threadChannel.sendMessage("Ticket created by " + member.getAsMention()).queue();
+                    threadChannel.sendMessage("**Title:** " + title + "\n**Description:** " + description + "\n**Alternatives:** " + alternatives).queue();
                     sendCloseTicketMessage(threadChannel);
                 });
     }
