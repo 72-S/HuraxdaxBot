@@ -42,7 +42,7 @@ public class TicketHandler {
                     if (supportRole != null) {
                         List<Member> supportMembers = channel.getGuild().getMembers().stream()
                                 .filter(guildMember -> guildMember.getRoles().contains(supportRole))
-                                .toList();
+                                .collect(Collectors.toList());
 
                         for (Member supportMember : supportMembers) {
                             threadChannel.addThreadMemberById(supportMember.getId()).queue();
@@ -72,7 +72,11 @@ public class TicketHandler {
                             embedBuilder.setColor(Color.RED);
                             break;
                         case "feature_request":
-                            embedBuilder.setColor(Color.getHSBColor(231f / 360f, 0.636f, 0.949f));
+                            float hue = 231f / 360f; // Convert degrees to a fraction (0.0 - 1.0)
+                            float saturation = 0.636f;
+                            float brightness = 0.949f;
+                            Color discordPrimaryColor = Color.getHSBColor(hue, saturation, brightness);
+                            embedBuilder.setColor(discordPrimaryColor);
                             break;
                         case "custom":
                             embedBuilder.setColor(Color.GRAY);
@@ -88,7 +92,7 @@ public class TicketHandler {
                     MessageEmbed messageEmbed = embedBuilder.build();
 
                     threadChannel.sendMessageEmbeds(messageEmbed)
-                            .addActionRow(Button.danger("close_ticket", "Close Ticket"))
+                            .addActionRow(Button.danger("close_ticket", "Close Ticket").withEmoji(net.dv8tion.jda.api.entities.emoji.Emoji.fromUnicode("❌")))
                             .queue();
                 });
     }

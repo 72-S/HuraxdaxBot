@@ -24,8 +24,21 @@ public class ButtonListener extends ListenerAdapter {
                     .addActionRow(bugReportButton, featureRequestButton, customButton)
                     .setEphemeral(true).queue();
         } else if (Objects.equals(event.getButton().getId(), "close_ticket")) {
+            // Send a confirmation message with Yes and No buttons
+            Button confirmYesButton = Button.danger("confirm_close_yes", "Yes").withEmoji(net.dv8tion.jda.api.entities.emoji.Emoji.fromUnicode("✅"));
+            Button confirmNoButton = Button.secondary("confirm_close_no", "No").withEmoji(net.dv8tion.jda.api.entities.emoji.Emoji.fromUnicode("❌"));
+
+            event.reply("Are you sure you want to close the ticket?")
+                    .addActionRow(confirmYesButton, confirmNoButton)
+                    .queue();
+        } else if (Objects.equals(event.getButton().getId(), "confirm_close_yes")) {
             // Close the ticket
             event.getChannel().delete().queue();
+        } else if (Objects.equals(event.getButton().getId(), "confirm_close_no")) {
+            // Delete the confirmation message
+            event.deferEdit().queue(); // Acknowledge the interaction
+            event.getHook().deleteOriginal().queue(); // Delete the original confirmation message
+
         } else if (Objects.equals(event.getButton().getId(), "create_bug_report")) {
             // Send checklist message for Bug Report
             Button confirmChecklistButton = Button.primary("confirm_checklist", "✅ Confirm Checklist");
