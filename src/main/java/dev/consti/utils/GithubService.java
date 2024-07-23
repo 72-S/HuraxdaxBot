@@ -9,10 +9,13 @@ public class GithubService {
     private static final String GITHUB_API_URL = "https://api.github.com/repos/" + ConfigHandler.getProperty("GITHUB_REPO") + "/issues";
     private static final String GITHUB_TOKEN = ConfigHandler.getProperty("GITHUB_TOKEN");
 
-    public String createIssue(String title, String description) {
+    public String createIssue(String title, String type, String description, String additionalInfo) {
         OkHttpClient client = new OkHttpClient();
 
-        String json = "{\"title\":\"" + title + "\",\"body\":\"" + description + "\"}";
+        String issueBody = String.format("### %s\n\n**Type:** %s\n\n**Description:**\n%s\n\n**Additional Info:**\n%s",
+                title, type, description, additionalInfo);
+
+        String json = "{\"title\":\"" + title + "\",\"body\":\"" + issueBody + "\"}";
 
         RequestBody body = RequestBody.create(json, MediaType.parse("application/json"));
         Request request = new Request.Builder()
