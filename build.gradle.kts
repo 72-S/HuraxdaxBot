@@ -1,6 +1,7 @@
 plugins {
     id("java")
     application
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 group = "dev.consti"
@@ -23,4 +24,16 @@ application {
 
 tasks.test {
     useJUnitPlatform()
+}
+tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
+    archiveClassifier.set("")
+    manifest {
+        attributes(
+            "Main-Class" to application.mainClass.get()
+        )
+    }
+}
+
+tasks.build {
+    dependsOn(tasks.shadowJar)
 }
