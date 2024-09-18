@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
 public class ConfigHandler {
 
@@ -16,8 +18,8 @@ public class ConfigHandler {
             File configFile = new File(ConfigFile);
             if (!configFile.exists()) {
 
-                try (InputStream input = ConfigHandler.class.getClassLoader().getResourceAsStream(CONFIG_FILE_NAME);
-                     FileOutputStream output = new FileOutputStream(configFile)) {
+                try (InputStream input = ConfigHandler.class.getClassLoader().getResourceAsStream(ConfigFile);
+                    FileOutputStream output = new FileOutputStream(configFile)) {
                      
                     if (input == null) {
                         throw new IllegalArgumentException("Config file not found in resources");
