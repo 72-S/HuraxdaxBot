@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "dev.consti"
-version = "1.0-SNAPSHOT"
+version = "1.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -14,8 +14,8 @@ repositories {
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    implementation("net.dv8tion:JDA:5.0.1")
-    implementation("org.slf4j:slf4j-simple:2.0.13")
+    implementation("net.dv8tion:JDA:5.1.0")
+    implementation("org.slf4j:slf4j-simple:2.0.16")
 }
 
 application {
@@ -34,6 +34,23 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     }
 }
 
+tasks.named("startShadowScripts") {
+    dependsOn("shadowJar", "jar")
+}
+
+tasks.named("distZip") {
+    dependsOn("shadowJar")
+}
+
+tasks.named("distTar") {
+    dependsOn("shadowJar")
+}
+
+tasks.named("startScripts") {
+    dependsOn("shadowJar")
+}
+
 tasks.build {
     dependsOn(tasks.shadowJar)
 }
+

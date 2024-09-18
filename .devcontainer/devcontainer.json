@@ -1,0 +1,15 @@
+{
+    "name": "Java 21",
+    "context": "..",
+    "dockerFile": "Dockerfile",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "java.jdt.ls.java.home": "/usr/local/openjdk-21"
+            },
+            "extensions": [
+                "redhat.java"
+            ]
+        }
+    }
+}
